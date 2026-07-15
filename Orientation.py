@@ -12,8 +12,12 @@ positions = csv_df[["PosX", "PosY", "PosZ"]].to_numpy(float)
 vectors = csv_df[["VectX", "VectY", "VectZ"]].to_numpy(float)
 
 
-vectors = vectors / np.linalg.norm(vectors, axis = 1, keepdims = True)
+lengths = np.linalg.norm(vectors, axis = 1, keepdims = True)
+vectors = vectors[lengths[:, 0] > 0]
+lengths = lengths[lengths[:, 0] > 0]
+vectors = vectors / lengths
 
+print("vectors kept: ", len(vectors))
 
 resulting_matrix = vectors.T @ vectors
 
@@ -26,6 +30,7 @@ angle_from_x_axis = np.degrees(np.arccos(abs(d[0])))
 angle_from_y_axis = np.degrees(np.arccos(abs(d[1])))
 
 angle_from_z_axis = np.degrees(np.arccos(abs(d[2])))
+
 
 print("Dominant direction:", np.round(d, 3))
 print("Angle from Z-axis:", round(angle_from_z_axis, 1), "deg")
