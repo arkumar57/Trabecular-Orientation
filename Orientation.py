@@ -15,9 +15,13 @@ positions = csv_df[["PosX", "PosY", "PosZ"]].to_numpy(float)
 vectors = csv_df[["VectX", "VectY", "VectZ"]].to_numpy(float)
 
 
+#Load relevant tiff files to check against anisotropy threshold
+
 tiff_files = glob.glob("anisotropy_images/*.tiff")
 tiff_files_stack = np.stack([tifffile.imread(f) for f in files], axis = -1)
 stack_y, stack_x, stack_z =  tiff_files_stack.shape
+
+#function defined to convert the csv_file points to pixels to check for qualification against anisotropy threshold
 
 def mm_to_pixel(mm_input, total_pixels):
     pixel_size = (mm_input.max() -mm_input.min()) / (total_pixels - 1)
@@ -36,7 +40,7 @@ points_to_keep = anisotropy_values >= anisotropy_threshold
 
 vectors = vectors[points_to_keep]
 
-
+#normalizes the vectors to minimize of impact of large values on the direction of bone strut
 
 lengths = np.linalg.norm(vectors, axis = 1, keepdims = True)
 vectors = vectors[lengths[:, 0] > 0]
@@ -45,9 +49,14 @@ vectors = vectors / lengths
 
 print("vectors kept: ", len(vectors))
 
+#nullifies the impact of sign of the values given they are randomly generated
+
 resulting_matrix = vectors.T @ vectors
 
 eigen_values, eigen_vectors = np.linalg.eigh(resulting_matrix)
+
+
+#dominant direction along which the bone strut aligns 
 
 principal_direction = eigen_vectors[:, -1]
 
