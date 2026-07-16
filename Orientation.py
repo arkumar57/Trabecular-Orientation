@@ -18,14 +18,14 @@ vectors = csv_df[["VectX", "VectY", "VectZ"]].to_numpy(float)
 #Load relevant tiff files to check against anisotropy threshold
 
 tiff_files = glob.glob("anisotropy_images/*.tiff")
-tiff_files_stack = np.stack([tifffile.imread(f) for f in files], axis = -1)
+tiff_files_stack = np.stack([tifffile.imread(f) for f in tiff_files], axis = -1)
 stack_y, stack_x, stack_z =  tiff_files_stack.shape
 
 #function defined to convert the csv_file points to pixels to check for qualification against anisotropy threshold
 
 def mm_to_pixel(mm_input, total_pixels):
     pixel_size = (mm_input.max() -mm_input.min()) / (total_pixels - 1)
-    return np.round((mm - mm.min()) /pixel_size).astype(int)
+    return np.round((mm_input - mm_input.min()) /pixel_size).astype(int)
 
 position_x_to_pixel = mm_to_pixel(positions[:, 0], stack_x)
 
@@ -34,7 +34,7 @@ position_y_to_pixel = mm_to_pixel(positions[:, 1], stack_y)
 position_z_to_pixel = mm_to_pixel(positions[:, 2], stack_z)
 
 
-anisotropy_values = stack[position_y_to_pixel, position_x_to_pixel, position_z_to_pixel]
+anisotropy_values = tiff_files_stack[position_y_to_pixel, position_x_to_pixel, position_z_to_pixel]
 
 points_to_keep = anisotropy_values >= anisotropy_threshold
 
